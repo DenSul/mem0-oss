@@ -1,7 +1,7 @@
 name: mem0_oss
 version: 1.0.0
 description: Self-hosted Mem0 memory provider for Hermes Agent. Works with any Mem0 OSS server via REST API.
-homepage: https://github.com/DenSul/hermes-mem0-oss
+homepage: https://github.com/DenSul/mem0-oss
 
 requires_env:
   - name: MEM0_BASE_URL
