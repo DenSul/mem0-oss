@@ -1,0 +1,21 @@
+name: mem0_oss
+version: 1.0.0
+description: Self-hosted Mem0 memory provider for Hermes Agent. Works with any Mem0 OSS server via REST API.
+homepage: https://github.com/DenSul/hermes-mem0-oss
+
+requires_env:
+  - name: MEM0_BASE_URL
+    description: Base URL of your Mem0 OSS server (e.g. http://72.56.117.69:8420)
+    url: https://github.com/mem0ai/mem0
+    secret: false
+  - name: MEM0_API_KEY
+    description: API key for Mem0 server authentication (optional, any value works)
+    secret: true
+  - name: MEM0_USER_ID
+    description: User identifier for memory scoping
+    secret: false
+  - name: MEM0_AGENT_ID
+    description: Agent identifier for memory attribution
+    secret: false
+
+type: memory_provider
