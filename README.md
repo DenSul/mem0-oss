@@ -1,8 +1,32 @@
 # mem0_oss — Self-Hosted Mem0 Memory Provider for Hermes Agent
 
-Plugin for [Hermes Agent](https://github.com/NousResearch/hermes-agent) that connects to any **self-hosted Mem0 OSS server** via REST API.
+Plugin for [Hermes Agent](https://github.com/NousResearch/hermes-agent) that connects to any **self-hosted Mem0 OSS server** via REST API — no Mem0 cloud, no API keys required.
 
-Unlike the official `mem0` plugin which requires Mem0 Platform API keys, this provider works with your own Mem0 OSS instance — no external dependencies, no API keys needed (use `local`).
+---
+
+## Why this exists
+
+Hermes Agent already has an official `mem0` plugin. So why build another one?
+
+The official plugin and the `mem0ai` Python SDK are built for **Mem0 Platform** — the managed cloud service. They use `/v2/memories/search/` endpoints that simply don't exist on a self-hosted Mem0 OSS server:
+
+```
+SDK calls:  /v2/memories/search/   ← Mem0 Platform only
+OSS has:    /v1/memories/search/   ← your own server
+```
+
+Every attempt to use the official SDK against a self-hosted instance ends the same way:
+
+```
+mem0ai 2.x:  "Connection refused" or 404 on /v2/...
+mem0ai 1.x:  Same problem — still calls /v2/ endpoints
+```
+
+There's no configuration flag to switch API versions. The SDK is tightly coupled to the Platform API.
+
+**This plugin solves it** by calling your Mem0 OSS server directly over REST — same endpoints your server actually provides. It was tested against a real self-hosted instance at `http://YOUR_MEM0_SERVER_IP:8420` and handles all three core operations: search, profile, and conclude.
+
+---
 
 ## Features
 
@@ -58,9 +82,21 @@ docker run -d -p 8420:8000 \
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
 | `MEM0_BASE_URL` | Yes | — | Mem0 OSS server URL |
-| `MEM0_API_KEY` | No | `local` | Any value; OSS server accepts any key |
+| `MEM0_API_KEY` | No | `local` | Any value; OSS accepts any key |
 | `MEM0_USER_ID` | No | `hermes-user` | User identifier for memory scoping |
 | `MEM0_AGENT_ID` | No | `hermes` | Agent identifier |
+
+## How it works
+
+The provider uses direct REST calls to your Mem0 OSS server:
+
+| Operation | Method | Endpoint |
+|-----------|--------|----------|
+| Search | `POST` | `/v1/memories/search/` |
+| Profile | `GET` | `/v1/memories/?user_id={user_id}` |
+| Store fact | `POST` | `/v1/memories/` |
+
+No official SDK used — avoids API version mismatches entirely.
 
 ## Repository Structure
 
@@ -69,16 +105,6 @@ mem0-oss/
 ├── __init__.py    # Mem0OSSMemoryProvider implementation
 └── plugin.yaml     # Plugin manifest
 ```
-
-## How It Works
-
-The provider uses direct REST calls to your Mem0 OSS server:
-
-- `GET /v1/memories/?user_id={user_id}` — profile
-- `POST /v1/memories/search/` — semantic search
-- `POST /v1/memories/` — store new fact
-
-No official SDK used — avoids API version mismatches with self-hosted servers.
 
 ## License
 
